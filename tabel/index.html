@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gangetabeller 1–9 – Træning</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --text:#e8eefc;
+      --muted:#a9b7da;
+      --border:#223054;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --btn:#2563eb;
+      --btn2:#334155;
+      --btn3:#0f172a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #070b14);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:10px;
+    }
+    .wrap{
+      width:min(820px, 100%);
+      height: calc(100vh - 20px);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .menu{
+      background:rgba(17,26,46,.92);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:8px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:8px;
+      flex: 0 0 auto;
+    }
+    .menuLeft{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      flex:1 1 auto;
+      min-width:0;
+    }
+    .row{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .menuRight{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      flex:0 0 auto;
+    }
+
+    button{
+      border:0;
+      border-radius:12px;
+      padding:8px 10px;
+      font-weight:900;
+      cursor:pointer;
+      color:white;
+      transition: transform .05s ease, opacity .15s ease;
+      user-select:none;
+      white-space:nowrap;
+      font-size:13px;
+      line-height:1;
+    }
+    button:active{ transform: translateY(1px); }
+    button[disabled]{ opacity:.55; cursor:not-allowed; }
+
+    .tableBtn{ background:var(--btn3); border:1px solid rgba(255,255,255,.06); padding:7px 10px; }
+    .tableBtn.active{ background: #0ea5e9; }
+
+    .modeBtn{ background:var(--btn3); border:1px solid rgba(255,255,255,.06); }
+    .modeBtn.active{ background:var(--btn); }
+
+    .btnStart{ background:var(--btn); }
+    .btnRetry{ background:var(--btn2); }
+    .btnNew{ background:#0b3b2d; }
+
+    .timer{
+      font-variant-numeric: tabular-nums;
+      font-weight:950;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0c1427;
+      color:var(--text);
+      min-width:105px;
+      text-align:center;
+      font-size:13px;
+      line-height:1;
+    }
+
+    .card{
+      background:rgba(17,26,46,.92);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      flex: 1 1 auto;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .headerLine{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .hTitle{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+      font-weight:950;
+    }
+    .hSub{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.25;
+      white-space:pre-line;
+    }
+
+    .grid{
+      width:100%;
+      display:grid;
+      grid-template-columns: 110px 84px;
+      gap:6px 4px;
+      align-items:center;
+    }
+    .expr{
+      display:flex;
+      align-items:center;
+      gap:4px;
+      font-size:16px;
+      white-space:nowrap;
+    }
+    .expr .mul{
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+    input.answer{
+      width:84px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:2px solid var(--border);
+      background:#0c1427;
+      color:var(--text);
+      font-size:16px;
+      font-weight:950;
+      text-align:center;
+      outline:none;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+      line-height:1.1;
+    }
+    input.answer:focus{
+      box-shadow: 0 0 0 4px rgba(37,99,235,.18);
+      border-color: rgba(37,99,235,.9);
+    }
+    input.answer:disabled{ opacity:.55; cursor:not-allowed; }
+    input.correct{ border-color: rgba(34,197,94,.95); background: rgba(34,197,94,.15); }
+    input.wrong{ border-color: rgba(245,158,11,.95); background: rgba(245,158,11,.16); }
+    input.current{ border-color: rgba(56,189,248,.95); box-shadow: 0 0 0 4px rgba(56,189,248,.14); }
+
+    .gridWide{
+      width:100%;
+      display:grid;
+      grid-template-columns: 1fr 120px;
+      gap:8px 10px;
+      align-items:center;
+    }
+    .exprWide{
+      font-size:17px;
+      font-weight:950;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    input.answerWide{ width:120px; }
+
+    .bottom{
+      flex: 0 0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:center;
+      padding:0 2px;
+    }
+    .msg{
+      min-height:22px;
+      font-size:18px;
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.25;
+      margin-bottom:2px;
+    }
+
+    .footer{
+      text-align:center;
+      color: rgba(169,183,218,.75);
+      font-size:12px;
+      padding:6px 0 2px;
+      user-select:none;
+    }
+
+    @media (max-width:420px){
+      body{ padding:8px; }
+      .wrap{ height: calc(100vh - 16px); gap:7px; }
+      .grid{ grid-template-columns: 104px 78px; }
+      input.answer{ width:78px; }
+      .expr{ font-size:15px; }
+      .gridWide{ grid-template-columns: 1fr 108px; }
+      input.answerWide{ width:108px; }
+      button{ padding:8px 9px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="menu">
+      <div class="menuLeft">
+        <div class="row" id="tableRow"></div>
+        <div class="row" id="modeRow"></div>
+      </div>
+      <div class="menuRight">
+        <button class="btnStart" id="startBtn" style="display:none;">Start</button>
+        <div class="timer" id="timer" style="display:none;">00:00.0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="headerLine">
+        <div>
+          <div class="hTitle" id="modeTitle">Niveau 1</div>
+          <div class="hSub" id="modeSub"></div>
+        </div>
+        <button class="btnNew" id="newBtn" style="display:none;">Giv mig nye stykker</button>
+      </div>
+
+      <div id="content"></div>
+
+      <div class="bottom">
+        <div class="msg" id="doneMsg" aria-live="polite"></div>
+        <button class="btnRetry" id="retryBtn" style="display:none;">Prøv igen!</button>
+        <div class="hint" id="hint"></div>
+      </div>
+      <div class="footer">© 2026 Thomas Bentsen. Alle rettigheder forbeholdes.</div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const tableRow = document.getElementById('tableRow');
+  const modeRow  = document.getElementById('modeRow');
+  const startBtn = document.getElementById('startBtn');
+  const timerEl  = document.getElementById('timer');
+  const newBtn   = document.getElementById('newBtn');
+  const modeTitle= document.getElementById('modeTitle');
+  const modeSub  = document.getElementById('modeSub');
+  const content  = document.getElementById('content');
+  const doneMsg  = document.getElementById('doneMsg');
+  const retryBtn = document.getElementById('retryBtn');
+  const hintEl   = document.getElementById('hint');
+
+  const compliments = ["Godt gået!", "Flot arbejde!", "Sejt!", "Sådan, Champ!"];
+  const TABLES = [1,2,3,4,5,6,7,8,9];
+
+  const MODES = [
+    { id:"lvl1", label:"Niveau 1" },
+    { id:"lvl2", label:"Niveau 2" },
+    { id:"lvl3", label:"Niveau 3" },
+    { id:"mul",  label:"Gange" },
+    { id:"div",  label:"Division" },
+  ];
+
+  let table = 3;
+  let mode = "lvl1";
+
+  // timer
+  let timerStarted = false;
+  let startTime = 0;
+  let timerId = null;
+
+  function formatTime(ms){
+    const totalTenths = Math.floor(ms / 100);
+    const tenths = totalTenths % 10;
+    const totalSeconds = Math.floor(totalTenths / 10);
+    const seconds = totalSeconds % 60;
+    const minutes = Math.floor(totalSeconds / 60);
+    const mm = String(minutes).padStart(2,'0');
+    const ss = String(seconds).padStart(2,'0');
+    return `${mm}:${ss}.${tenths}`;
+  }
+  function timerReset(){
+    if (timerId) clearInterval(timerId);
+    timerId = null;
+    timerStarted = false;
+    startBtn.disabled = false;
+    timerEl.textContent = "00:00.0";
+  }
+  function timerStart(){
+    if (timerStarted) return;
+    timerStarted = true;
+    startBtn.disabled = true;
+    startTime = performance.now();
+    timerId = setInterval(()=>{ timerEl.textContent = formatTime(performance.now()-startTime); }, 100);
+  }
+  function timerStop(){
+    if (!timerStarted) return;
+    clearInterval(timerId);
+    timerId = null;
+    timerEl.textContent = formatTime(performance.now()-startTime);
+  }
+
+  function clearBottom(){
+    doneMsg.textContent = "";
+    retryBtn.style.display = "none";
+  }
+  function setHint(t){ hintEl.textContent = t || ""; }
+  function setStartVisible(v){
+    startBtn.style.display = v ? "inline-block" : "none";
+    timerEl.style.display  = v ? "inline-block" : "none";
+  }
+  function setNewVisible(v){ newBtn.style.display = v ? "inline-block" : "none"; }
+
+  function digitsOnlyInputBehavior(input){
+    input.addEventListener('keydown', (e) => {
+      const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Enter"];
+      if (allowed.includes(e.key)) return;
+      if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+  }
+
+  function focusFirstEnabled(){
+    const el = content.querySelector('input:not([disabled]):not([readonly])');
+    if (el) el.focus();
+  }
+
+  function baseTasks(){
+    return Array.from({length:10}, (_,i)=>({ n:i+1, ans:(i+1)*table }));
+  }
+
+  // Level 1
+  function buildLevel1(){
+    const tasks = baseTasks();
+    const grid = document.createElement('div');
+    grid.className = "grid";
+
+    tasks.forEach((t, idx) => {
+      const left = document.createElement('div');
+      left.className = "expr";
+      left.innerHTML = `<span class="mul">${table} × ${t.n}</span>`;
+
+      const input = document.createElement('input');
+      input.className = "answer";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.maxLength = 2;
+      input.dataset.idx = String(idx);
+      digitsOnlyInputBehavior(input);
+
+      input.disabled = idx !== 0;
+
+      input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const clean = raw.replace(/\D+/g,"");
+        if (clean !== raw) input.value = clean;
+
+        if (clean.length === 0){ input.classList.remove("correct","wrong"); return; }
+        const val = Number(clean);
+
+        if (val === t.ans){
+          input.classList.remove("wrong");
+          input.classList.add("correct");
+          input.readOnly = true;
+
+          const next = grid.querySelector(`input.answer[data-idx="${idx+1}"]`);
+          if (next){
+            next.disabled = false;
+            next.focus();
+          } else {
+            timerStop();
+            doneMsg.textContent = compliments[Math.floor(Math.random()*compliments.length)];
+            retryBtn.style.display = "inline-block";
+            grid.querySelectorAll("input.answer").forEach(inp => inp.disabled = true);
+          }
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+        }
+      });
+
+      grid.appendChild(left);
+      grid.appendChild(input);
+    });
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+
+    startBtn.onclick = () => { timerStart(); focusFirstEnabled(); };
+    retryBtn.onclick = () => renderMode(mode);
+
+    focusFirstEnabled();
+  }
+
+  // Level 2 helpers
+  function sampleKUniqueIndices(fromIdx, toIdx, k){
+    const pool = [];
+    for (let i=fromIdx; i<=toIdx; i++) pool.push(i);
+    for (let i=pool.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0,k).sort((a,b)=>a-b);
+  }
+
+  // Level 2
+  function buildLevel2(){
+    const tasks = baseTasks();
+    const blanks = new Set(sampleKUniqueIndices(2, 8, 3));
+    const grid = document.createElement('div');
+    grid.className = "grid";
+    const inputs = [];
+
+    function nextEditableIndex(from){
+      for (let i=from; i<inputs.length; i++){
+        if (!inputs[i].readOnly) return i;
+      }
+      return -1;
+    }
+    function enableOnly(idx){
+      inputs.forEach((inp, i) => {
+        if (inp.readOnly) inp.disabled = false;
+        else inp.disabled = (i !== idx);
+      });
+    }
+
+    tasks.forEach((t, idx) => {
+      const left = document.createElement('div');
+      left.className = "expr";
+      left.innerHTML = `<span class="mul">${table} × ${t.n}</span>`;
+
+      const input = document.createElement('input');
+      input.className = "answer";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.maxLength = 2;
+      input.dataset.idx = String(idx);
+      digitsOnlyInputBehavior(input);
+
+      if (!blanks.has(idx)){
+        input.value = String(t.ans);
+        input.classList.add("correct");
+        input.readOnly = true;
+      }
+
+      input.addEventListener('input', () => {
+        if (input.readOnly) return;
+
+        const raw = input.value.trim();
+        const clean = raw.replace(/\D+/g,"");
+        if (clean !== raw) input.value = clean;
+
+        if (clean.length === 0){ input.classList.remove("correct","wrong"); return; }
+        const val = Number(clean);
+
+        if (val === t.ans){
+          input.classList.remove("wrong");
+          input.classList.add("correct");
+          input.readOnly = true;
+
+          const nextIdx = nextEditableIndex(idx+1);
+          if (nextIdx !== -1){
+            enableOnly(nextIdx);
+            inputs[nextIdx].focus();
+          } else {
+            doneMsg.textContent = compliments[Math.floor(Math.random()*compliments.length)];
+            retryBtn.style.display = "inline-block";
+            inputs.forEach(inp => inp.disabled = true);
+          }
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+        }
+      });
+
+      inputs[idx] = input;
+      grid.appendChild(left);
+      grid.appendChild(input);
+    });
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+
+    const firstIdx = nextEditableIndex(0);
+    if (firstIdx !== -1){
+      enableOnly(firstIdx);
+      inputs[firstIdx].focus();
+    }
+
+    retryBtn.onclick = () => renderMode(mode);
+  }
+
+  // Level 3
+  function shuffle(arr){
+    for (let i=arr.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function buildLevel3(){
+    const tasks = baseTasks();
+    const order = shuffle([...Array(10).keys()]);
+    let step = 0;
+
+    const grid = document.createElement('div');
+    grid.className = "grid";
+    const inputs = [];
+
+    tasks.forEach((t, idx) => {
+      const left = document.createElement('div');
+      left.className = "expr";
+      left.innerHTML = `<span class="mul">${table} × ${t.n}</span>`;
+
+      const input = document.createElement('input');
+      input.className = "answer";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.maxLength = 2;
+      input.dataset.idx = String(idx);
+      digitsOnlyInputBehavior(input);
+
+      input.disabled = true;
+
+      input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const clean = raw.replace(/\D+/g,"");
+        if (clean !== raw) input.value = clean;
+
+        if (clean.length === 0){ input.classList.remove("correct","wrong"); return; }
+        const val = Number(clean);
+
+        if (val === t.ans){
+          input.classList.remove("wrong","current");
+          input.classList.add("correct");
+          input.readOnly = true;
+          input.disabled = true;
+
+          step++;
+          if (step >= order.length){
+            timerStop();
+            doneMsg.textContent = compliments[Math.floor(Math.random()*compliments.length)];
+            retryBtn.style.display = "inline-block";
+            return;
+          }
+          activateCurrent();
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+        }
+      });
+
+      inputs[idx] = input;
+      grid.appendChild(left);
+      grid.appendChild(input);
+    });
+
+    function activateCurrent(){
+      inputs.forEach(inp => inp.classList.remove("current"));
+      inputs.forEach(inp => { if (!inp.readOnly) inp.disabled = true; });
+
+      const idx = order[step];
+      const inp = inputs[idx];
+      inp.disabled = false;
+      inp.classList.add("current");
+      inp.focus();
+    }
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+
+    startBtn.disabled = false;
+    startBtn.onclick = () => { timerStart(); activateCurrent(); };
+    retryBtn.onclick = () => renderMode(mode);
+  }
+
+  // Mul/Div
+  function randInt(min, max){ return Math.floor(Math.random()*(max-min+1)) + min; }
+  function digitsRange(d){
+    if (d === 1) return [1,9];
+    const min = Math.pow(10,d-1);
+    const max = Math.pow(10,d)-1;
+    return [min,max];
+  }
+
+  function buildMul(){
+    const specs = [
+      { a: table,         digits:1 },
+      { a: table,         digits:2 },
+      { a: table,         digits:3 },
+      { a: table,         digits:4 },
+      { a: table*10,      digits:4 },
+      { a: table*100,     digits:4 },
+      { a: table*1000,    digits:4 },
+    ];
+
+    const tasks = specs.map(s => {
+      const [min,max] = digitsRange(s.digits);
+      const b = randInt(min,max);
+      return { a:s.a, b, ans:s.a*b };
+    });
+
+    const grid = document.createElement('div');
+    grid.className = "gridWide";
+
+    tasks.forEach((t) => {
+      const left = document.createElement('div');
+      left.className = "exprWide";
+      left.textContent = `${t.a} × ${t.b}`;
+
+      const input = document.createElement('input');
+      input.className = "answer answerWide";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.maxLength = 10;
+      digitsOnlyInputBehavior(input);
+
+      input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const clean = raw.replace(/\D+/g,"");
+        if (clean !== raw) input.value = clean;
+
+        if (clean.length === 0){ input.classList.remove("correct","wrong"); return; }
+        const val = Number(clean);
+        if (val === t.ans){
+          input.classList.remove("wrong");
+          input.classList.add("correct");
+          input.readOnly = true;
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+        }
+      });
+
+      grid.appendChild(left);
+      grid.appendChild(input);
+    });
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+
+    newBtn.onclick = () => renderMode(mode);
+    setHint("Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.");
+  }
+
+  function buildDiv(){
+    const specs = [
+      { digits:1, divisor:table },
+      { digits:2, divisor:table },
+      { digits:3, divisor:table },
+      { digits:4, divisor:table },
+      { digits:4, divisor:table*10 },
+    ];
+
+    function makeDividend(digits, divisor){
+      const [min,max] = digitsRange(digits);
+      const qMin = Math.ceil(min / divisor);
+      const qMax = Math.floor(max / divisor);
+      const q = randInt(qMin, qMax);
+      return { dividend: q*divisor, divisor, ans:q };
+    }
+
+    const tasks = specs.map(s => makeDividend(s.digits, s.divisor));
+
+    const grid = document.createElement('div');
+    grid.className = "gridWide";
+
+    tasks.forEach((t) => {
+      const left = document.createElement('div');
+      left.className = "exprWide";
+      left.textContent = `${t.dividend} : ${t.divisor}`;
+
+      const input = document.createElement('input');
+      input.className = "answer answerWide";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.maxLength = 10;
+      digitsOnlyInputBehavior(input);
+
+      input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const clean = raw.replace(/\D+/g,"");
+        if (clean !== raw) input.value = clean;
+
+        if (clean.length === 0){ input.classList.remove("correct","wrong"); return; }
+        const val = Number(clean);
+        if (val === t.ans){
+          input.classList.remove("wrong");
+          input.classList.add("correct");
+          input.readOnly = true;
+        } else {
+          input.classList.remove("correct");
+          input.classList.add("wrong");
+        }
+      });
+
+      grid.appendChild(left);
+      grid.appendChild(input);
+    });
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+
+    newBtn.onclick = () => renderMode(mode);
+    setHint("Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.");
+  }
+
+  // UI
+  function renderTableButtons(){
+    tableRow.innerHTML = "";
+    TABLES.forEach(t => {
+      const b = document.createElement('button');
+      b.className = "tableBtn" + (t === table ? " active" : "");
+      b.textContent = String(t);
+      b.addEventListener('click', () => { table = t; renderAll(); });
+      tableRow.appendChild(b);
+    });
+  }
+
+  function renderModeButtons(){
+    modeRow.innerHTML = "";
+    MODES.forEach(m => {
+      const b = document.createElement('button');
+      b.className = "modeBtn" + (m.id === mode ? " active" : "");
+      b.textContent = m.label;
+      b.addEventListener('click', () => { mode = m.id; renderAll(); });
+      modeRow.appendChild(b);
+    });
+  }
+
+  function renderMode(which){
+    clearBottom();
+    timerReset();
+    setNewVisible(false);
+    setStartVisible(false);
+    startBtn.onclick = null;
+    newBtn.onclick = null;
+    retryBtn.onclick = null;
+    setHint("");
+
+    if (which === "lvl1"){
+      modeTitle.textContent = `Niveau 1 – ${table}-tabellen`;
+      modeSub.textContent = "Udfyld fra toppen og ned. Stopur er valgfrit.";
+      setStartVisible(true);
+      setHint("Tip: Du behøver ikke starte stopuret. Bare skriv svarene i felterne.");
+      buildLevel1();
+    }
+
+    if (which === "lvl2"){
+      modeTitle.textContent = `Niveau 2 – ${table}-tabellen`;
+      modeSub.textContent =
+        "3 vilkårlige felter (fra 3. til 9.) er tomme. Udfyld dem fra toppen og ned. Intet stopur.\n" +
+        "TIP 💡 Sig tabellen højt, mens du indtaster dine svar: 3, 6, 9, osv...";
+      retryBtn.style.display = "inline-block";
+      setHint("Du kan trykke Prøv igen for nye kombinationer.");
+      buildLevel2();
+    }
+
+    if (which === "lvl3"){
+      modeTitle.textContent = `Niveau 3 – ${table}-tabellen`;
+      modeSub.textContent =
+        "Systemet vælger rækkefølgen (random) og markerer ét felt ad gangen. Stopur bruges her.\n" +
+        "Tryk Start – så bliver det første felt markeret, og du kan svare med det samme.";
+      setStartVisible(true);
+      buildLevel3();
+    }
+
+    if (which === "mul"){
+      modeTitle.textContent = `Gange med ${table}`;
+      modeSub.textContent = "Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.";
+      setNewVisible(true);
+      buildMul();
+    }
+
+    if (which === "div"){
+      modeTitle.textContent = `Dividere med ${table}`;
+      modeSub.textContent = "Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.";
+      setNewVisible(true);
+      buildDiv();
+    }
+  }
+
+  function renderAll(){
+    renderTableButtons();
+    renderModeButtons();
+    renderMode(mode);
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
