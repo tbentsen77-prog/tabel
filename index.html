@@ -115,7 +115,6 @@
       border-radius:14px;
       padding:10px 12px;
       flex: 1 1 auto;
-      overflow:hidden;
       display:flex;
       flex-direction:column;
       gap:8px;
@@ -181,6 +180,12 @@
     input.wrong{ border-color: rgba(245,158,11,.95); background: rgba(245,158,11,.16); }
     input.current{ border-color: rgba(56,189,248,.95); box-shadow: 0 0 0 4px rgba(56,189,248,.14); }
 
+    input.answer.lvl2{
+      width:76px;
+      padding:4px 8px;
+      font-size:14px;
+    }
+
     .gridWide{
       width:100%;
       display:grid;
@@ -224,7 +229,7 @@
       text-align:center;
       color: rgba(169,183,218,.75);
       font-size:12px;
-      padding:6px 0 2px;
+      padding:0;
       user-select:none;
     }
 
@@ -258,6 +263,7 @@
         <div>
           <div class="hTitle" id="modeTitle">Niveau 1</div>
           <div class="hSub" id="modeSub"></div>
+            
         </div>
         <button class="btnNew" id="newBtn" style="display:none;">Giv mig nye stykker</button>
       </div>
@@ -269,17 +275,21 @@
         <button class="btnRetry" id="retryBtn" style="display:none;">Prøv igen!</button>
         <div class="hint" id="hint"></div>
       </div>
-      <div class="footer">© 2026 Thomas Bentsen. Alle rettigheder forbeholdes.
-        <div style="margin-top:6px;">
+      <div class="footer">
+  <div id="courseLinks" style="display:none; margin-top:128px; margin-bottom:16px;">
+<div style="margin-top:6px;">
           <a href="https://klarmatematik.learnworlds.com/course/gange" target="_blank" style="color:inherit; text-decoration:underline;">Få styr på at gange</a>
         </div>
         <div style="margin-top:4px;">
           <a href="https://klarmatematik.learnworlds.com/course/division" target="_blank" style="color:inherit; text-decoration:underline;">Lær division trin for trin</a>
+<br>
+<a href="https://klarmatematik.learnworlds.com/course/bestaa-9-klasses-matematikeksamen-uden-hjaelpemidler" target="_blank" style="color:inherit; text-decoration:underline;">Klar til matematikeksamen i 9. klasse</a>
         </div>
-        <div style="margin-top:4px;">
-          <a href="https://klarmatematik.learnworlds.com/course/bestaa-9-klasses-matematikeksamen-uden-hjaelpemidler" target="_blank" style="color:inherit; text-decoration:underline;">Klar til matematikeksamen i 9. klasse</a>
-        </div>
-      </div>
+</div>
+  <div>© 2026 Thomas Bentsen. Alle rettigheder forbeholdes.</div>
+
+</div>
+</div>
     </div>
   </div>
 
@@ -301,15 +311,16 @@
   const TABLES = [1,2,3,4,5,6,7,8,9];
 
   const MODES = [
-    { id:"lvl1", label:"Niveau 1" },
-    { id:"lvl2", label:"Niveau 2" },
-    { id:"lvl3", label:"Niveau 3" },
-    { id:"mul",  label:"Gange" },
-    { id:"div",  label:"Division" },
-  ];
+  { id:"guide", label:"Guide" },
+  { id:"lvl1", label:"Niveau 1" },
+  { id:"lvl2", label:"Niveau 2" },
+  { id:"lvl3", label:"Niveau 3" },
+  { id:"mul",  label:"Gange" },
+  { id:"div",  label:"Division" },
+];
 
   let table = 3;
-  let mode = "lvl1";
+  let mode = "guide";
 
   // timer
   let timerStarted = false;
@@ -357,6 +368,8 @@
     timerEl.style.display  = v ? "inline-block" : "none";
   }
   function setNewVisible(v){ newBtn.style.display = v ? "inline-block" : "none"; }
+
+  function setCourseLinksVisible(v){ if (courseLinks) courseLinks.style.display = v ? "block" : "none"; }
 
   function digitsOnlyInputBehavior(input){
     input.addEventListener('keydown', (e) => {
@@ -477,7 +490,7 @@
       left.innerHTML = `<span class="mul">${table} × ${t.n}</span>`;
 
       const input = document.createElement('input');
-      input.className = "answer";
+      input.className = "answer lvl2";
       input.type = "text";
       input.inputMode = "numeric";
       input.autocomplete = "off";
@@ -691,7 +704,7 @@
     content.appendChild(grid);
 
     newBtn.onclick = () => renderMode(mode);
-    setHint("Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.");
+    setHint("");
   }
 
   function buildDiv(){
@@ -754,8 +767,47 @@
     content.appendChild(grid);
 
     newBtn.onclick = () => renderMode(mode);
-    setHint("Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.");
+    setHint("");
   }
+
+  
+  function buildGuide(){
+  const scroll = document.createElement('div');
+    scroll.style.paddingRight = "8px";
+
+  scroll.innerHTML = `
+<style>
+  h2 { margin: 0 0 6px 0; }
+  h3 { margin: 20px 0 4px 0; }
+  p  { margin: 0 0 8px 0; }
+</style>
+
+    <h2>Sådan bruger du træningen</h2>
+    <p>Ved at følge denne guide arbejder du systematisk med tabeller, gange og division. Træningen er bygget op i trin, så du hele tiden ved, hvad næste skridt er.</p>
+
+    <h3>a) Vælg en tabel fra 1–9</h3>
+    <p>Start med den tabel, du gerne vil have bedre styr på.</p>
+
+    <h3>b) Niveau 1 – grundtræning</h3>
+    <p>Her skriver du tabellen fra toppen og ned.<br>
+    Du kan vælge at bruge stopuret, hvis du vil udfordre dig selv lidt på tempo. Nogle synes, det er motiverende, andre foretrækker at arbejde uden tid. Begge dele er helt fint.</p>
+
+    <h3>c) Niveau 2 – arbejde med huller</h3>
+    <p>Når du føler dig rimelig stærk i tabellen, går du videre til niveau 2.<br>
+    Her vælger programmet selv, hvilke dele af tabellen du skal udfylde. Du arbejder med udvalgte stykker i skiftende mønstre, så du bliver mere sikker på de dele, der typisk driller.</p>
+
+    <h3>d) Niveau 3 – overblik og automatisering</h3>
+    <p>På niveau 3 skal hele tabellen udfyldes i tilfældig rækkefølge.<br>
+    Systemet bestemmer rækkefølgen, og du arbejder med én opgave ad gangen. Det styrker både overblik og sikkerhed.</p>
+
+    <h3>e) Gange og division i praksis</h3>
+    <p>Nu kommer du til siderne med gangestykker og divisionsstykker. Her kan du selv vælge, hvilken tabel du gerne vil bruge til at regne rigtige stykker med.</p>
+  `;
+
+  content.innerHTML = "";
+  content.appendChild(scroll);
+}
+
 
   // UI
   function renderTableButtons(){
@@ -775,12 +827,20 @@
       const b = document.createElement('button');
       b.className = "modeBtn" + (m.id === mode ? " active" : "");
       b.textContent = m.label;
-      b.addEventListener('click', () => { mode = m.id; renderAll(); });
+      b.addEventListener('click', () => { table = 1; mode = m.id; renderAll(); });
       modeRow.appendChild(b);
     });
   }
 
   function renderMode(which){
+
+    // reset card style (non-guide modes)
+    const card = document.querySelector('.card');
+    card.style.background = "";
+    card.style.color = "";
+    card.style.border = "";
+    tableRow.style.display = "";
+
     clearBottom();
     timerReset();
     setNewVisible(false);
@@ -789,9 +849,14 @@
     newBtn.onclick = null;
     retryBtn.onclick = null;
     setHint("");
+    setCourseLinksVisible(false);
+
+    // reset content scrolling (only Guide uses scroll)
+    content.style.overflowY = "visible";
+    content.style.flex = "0 0 auto";
 
     if (which === "lvl1"){
-      modeTitle.textContent = `Niveau 1 – ${table}-tabellen`;
+      modeTitle.innerHTML = `${table}-tabellen<br>Niveau 1<br><br>`;
       modeSub.textContent = "Udfyld fra toppen og ned. Stopur er valgfrit.";
       setStartVisible(true);
       setHint("Tip: Du behøver ikke starte stopuret. Bare skriv svarene i felterne.");
@@ -799,7 +864,7 @@
     }
 
     if (which === "lvl2"){
-      modeTitle.textContent = `Niveau 2 – ${table}-tabellen`;
+      modeTitle.innerHTML = `${table}-tabellen<br>Niveau 2<br><br>`;
       modeSub.textContent =
         "3 vilkårlige felter (fra 3. til 9.) er tomme. Udfyld dem fra toppen og ned. Intet stopur.\n" +
         "TIP 💡 Sig tabellen højt, mens du indtaster dine svar: 3, 6, 9, osv...";
@@ -809,7 +874,7 @@
     }
 
     if (which === "lvl3"){
-      modeTitle.textContent = `Niveau 3 – ${table}-tabellen`;
+      modeTitle.innerHTML = `${table}-tabellen<br>Niveau 3<br><br>`;
       modeSub.textContent =
         "Systemet vælger rækkefølgen (random) og markerer ét felt ad gangen. Stopur bruges her.\n" +
         "Tryk Start – så bliver det første felt markeret, og du kan svare med det samme.";
@@ -818,17 +883,38 @@
     }
 
     if (which === "mul"){
+      setCourseLinksVisible(true);
       modeTitle.textContent = `Gange med ${table}`;
-      modeSub.textContent = "Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.";
+      modeSub.textContent = "";
       setNewVisible(true);
       buildMul();
     }
 
     if (which === "div"){
+      setCourseLinksVisible(true);
       modeTitle.textContent = `Dividere med ${table}`;
-      modeSub.textContent = "Du vælger selv rækkefølgen, og du kan altid lave nye stykker ved tryk på knappen.";
+      modeSub.textContent = "";
       setNewVisible(true);
       buildDiv();
+    }
+
+    if (which === "guide"){
+
+      // Guide visual style
+      const card = document.querySelector('.card');
+      card.style.background = "#ffffff";
+      card.style.color = "#111111";
+      card.style.border = "1px solid #C9DDF2";
+      tableRow.style.display = "none";
+
+      modeTitle.textContent = "Guide";
+      modeSub.textContent = "";
+      setStartVisible(false);
+      setNewVisible(false);
+      setCourseLinksVisible(false);
+      content.style.flex = "1 1 auto";
+      content.style.overflowY = "auto";
+      buildGuide();
     }
   }
 
@@ -839,7 +925,22 @@
   }
 
   renderAll();
+
+  // place table row ABOVE title (once)
+  const card = document.querySelector('.card');
+  const headerLine = document.querySelector('.headerLine');
+  if (tableRow && card && headerLine && tableRow.parentElement !== card) {
+    card.insertBefore(tableRow, headerLine);
+  }
+
+
+  // place table row under the mode title (once)
+  
+
+
 })();
 </script>
+
+
 </body>
 </html>
